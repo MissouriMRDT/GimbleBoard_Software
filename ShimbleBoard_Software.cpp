@@ -1,36 +1,16 @@
 // Shimble Board ///////////////////////////////////////////////////////////////////////////////////////
-// Main .cpp File
+    // Main .cpp File
 //
 // Created for 2019 Valkyrie by: Andrew Phillips, ajpnq2
 //
 // Libraries ///////////////////////////////////////////////////////////////////////////////////////////
-#include "RoveComm.h"
-#include "Servo.h"
+#include "ShimbleBoard_Software.h"
 
 RoveCommEthernetUdp RoveComm; //Extantiates RoveComm class
 
-// Constants //////////////////////////////////////////////////////////////////////////////////////////////
-    // Pinout
-#define SERVO_1_CRTL_PIN   PM_7
-#define SERVO_2_CRTL_PIN   PA_7
-#define SERVO_3_CRTL_PIN   PM_6
-#define SERVO_4_CRTL_PIN   PM_1
-#define SERVO_5_CRTL_PIN   PM_0
-#define SERVO_6_CRTL_PIN   PK_5
-#define SERVO_7_CRTL_PIN   PK_4
-#define SERVO_8_CRTL_PIN   PG_1
+// Setup & Loop Funcitons //////////////////////////////////////////////////////////////////////////////
 
-    //Delays
-#define ROVECOMM_DELAY    5
-
-    // Declarations
-Servo Servos[8];
-unsigned long telemetry_time = 0;
-uint16_t servo_positions[8];
-
-// Setup & Loop Funcitons /////////////////////////////////////////////////////////////////////////////
-
-void setup()
+void shimbleSetup() //void setup
 {
   Serial.begin(9600);
   RoveComm.begin(RC_SHIMBLENAVBOARD_FOURTHOCTET);
@@ -51,16 +31,15 @@ void setup()
   }
 }
 
-void loop() 
-{
-  // put your main code here, to run repeatedly: 
+void shimbleLoop(rovecomm_packet) //void loop
+{ 
   rovecomm_packet packet;
   RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_posotions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
 
   for (int i = 0; i < RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT; i++)
-    {
-      servo_positions[i] = Servos[i].read();
-    }
+  {
+    servo_positions[i] = Servos[i].read();
+  }
   
   packet = RoveComm.read();
 
@@ -98,9 +77,9 @@ void loop()
   }
 
   if (millis() - telemetry_time >= 1000) // If it's been more than 1 second since telemetry was sent,
-  {                                    // send telemetry and update telemetry_time
+  {                                      // send telemetry and update telemetry_time
     telemetry_time = millis();
     RoveComm.write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
-    delay (ROVECOMM_DELAY);
+    delay(ROVECOMM_DELAY);
   }
 }
