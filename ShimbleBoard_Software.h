@@ -20,17 +20,11 @@
 #define SERVO_6_CRTL_PIN   PK_5
 #define SERVO_7_CRTL_PIN   PK_4
 #define SERVO_8_CRTL_PIN   PG_1
-
     //Delays
 #define ROVECOMM_DELAY    5
-    
-// Variable Declarations ////////////////////////////////////////////////////////////////////////////////
-Servo Servos[8];
-uint16_t servo_positions[8];
-uint32_t telemetry_time = 0;
 
 // Function Declarations ////////////////////////////////////////////////////////////////////////////////
 void shimbleSetup();
-void shimbleLoop(rovecomm_packet packet);
+void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm);
 
 #endif

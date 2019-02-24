@@ -5,16 +5,19 @@
 //
 // Libraries ///////////////////////////////////////////////////////////////////////////////////////////
 #include "ShimbleBoard_Software.h"
+#include "RoveComm.h"
+#include <Energia.h>
 
-RoveCommEthernetUdp RoveComm; //Extantiates RoveComm class
+// Variable Declarations ///////////////////////////////////////////////////////////////////////////////
+Servo Servos[8];
+uint16_t servo_positions[8];
+uint32_t telemetry_time = 0;
 
 // Setup & Loop Funcitons //////////////////////////////////////////////////////////////////////////////
 
 void shimbleSetup() //void setup
 {
   Serial.begin(9600);
-  RoveComm.begin(RC_SHIMBLENAVBOARD_FOURTHOCTET);
-  delay(ROVECOMM_DELAY);
 
   Servos[0].attach(SERVO_1_CRTL_PIN);
   Servos[1].attach(SERVO_2_CRTL_PIN);
@@ -29,25 +32,39 @@ void shimbleSetup() //void setup
   {
     Servos[i].write(0);
   }
+
+
+  Serial.println("Shimble Setup Complete.");
 }
 
-void shimbleLoop(rovecomm_packet) //void loop
+void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void loop
 { 
-  rovecomm_packet packet;
+  /*
+  while(1)
+  {
+    for (int j = 0; j<180; j+=1)
+
+    {
+       for (int i = 0; i < 8; i++)
+        {
+          Servos[i].write(j);//Our Range is (60, 120) where 90 is full stop, 60 is full CW, and 120 is full CCW
+        }
+        Serial.println(j);
+        delay(100);
+    }   
+  }*/
   RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_posotions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
 
   for (int i = 0; i < RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT; i++)
   {
     servo_positions[i] = Servos[i].read();
   }
-  
-  packet = RoveComm.read();
 
   if(packet.data_id != 0)
   {
     switch (packet.data_id)
     {
-      case RC_SHIMBLEBOARD_SERVOINC_DATAID:
+      case RC_SHIMBLEBOARD_SERVOINC_DATAID: //Servo Increment
       {
         for (int i = 0; i < RC_SHIMBLEBOARD_SERVOINC_DATACOUNT; i++)
         {
@@ -56,16 +73,52 @@ void shimbleLoop(rovecomm_packet) //void loop
         break;
       }
 
-      case RC_SHIMBLEBOARD_SERVOTOPOS_DATAID:
+      case RC_SHIMBLEBOARD_MAINGBIMALINC_DATAID: //Main Gimbal Increment
       {
-        for (int i = 0; i < RC_SHIMBLEBOARD_SERVOTOPOS_DATACOUNT; i++)
+        for (int i = 0; i < RC_SHIMBLEBOARD_MAINGBIMALINC_DATACOUNT; i++)
+        {
+           Servos[i].write(servo_positions[i] + packet.data[i]);
+        }
+        break;
+      }
+
+      case RC_SHIMBLEBOARD_DRIVEGBIMALINC_DATAID: //Drive Gimbal Increment
+      {
+        for (int i = 0; i < RC_SHIMBLEBOARD_DRIVEGBIMALINC_DATACOUNT; i++)
+        {
+           Servos[i].write(servo_positions[i] + packet.data[i]);
+        }
+        break;
+      }
+
+      case RC_SHIMBLEBOARD_SERVOABSOLUTE_DATAID: //Servo Absolute
+      {
+        for (int i = 0; i < RC_SHIMBLEBOARD_SERVOABSOLUTE_DATACOUNT; i++)
         {
            Servos[i].write(packet.data[i]);
         }
         break;    
       }
 
-      /*case RC_SHIMBLEBOARD_SERVOTOSETPOS_DATAID:
+      case RC_SHIMBLEBOARD_MAINGIMBALABS_DATAID: //Main Gimbal Abolute
+      {
+        for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALABS_DATACOUNT; i++)
+        {
+           Servos[i].write(packet.data[i]);
+        }
+        break;    
+      }
+
+      case RC_SHIMBLEBOARD_DRIVEGIMBALABS_DATAID: //Drive Gimbal Abolute
+      {
+        for (int i = 0; i < RC_SHIMBLEBOARD_DRIVEGIMBALABS_DATACOUNT; i++)
+        {
+           Servos[i].write(packet.data[i]);
+        }
+        break;    
+      }
+
+      /*case RC_SHIMBLEBOARD_SERVOTOSETPOS_DATAID: //Servo to set position
       {
         for (int i = 0; i < RC_SHIMBLEBOARD_SERVOTOSETPOS_DATACOUNT; i++)
         {
@@ -79,7 +132,7 @@ void shimbleLoop(rovecomm_packet) //void loop
   if (millis() - telemetry_time >= 1000) // If it's been more than 1 second since telemetry was sent,
   {                                      // send telemetry and update telemetry_time
     telemetry_time = millis();
-    RoveComm.write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
+    RoveComm->write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
     delay(ROVECOMM_DELAY);
   }
 }
