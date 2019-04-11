@@ -28,14 +28,10 @@ void shimbleSetup() //void setup
   Servos[6].attach(SERVO_7_CRTL_PIN);
   Servos[7].attach(SERVO_8_CRTL_PIN);
 
-  //for (int i = 0; i < 8; i++)
-  //{
-    Servos[5].write(89);
-	Servos[1].write(150);
-	Servos[2].write(75);
-	Servos[3].write(15);
-	
-  //}
+  Servos[5].write(89);
+  Servos[1].write(150);
+  Servos[2].write(75);
+  Servos[3].write(15);
 
 
   Serial.println("Shimble Setup Complete.");
@@ -43,21 +39,7 @@ void shimbleSetup() //void setup
 
 void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void loop
 { 
-  /*
-  while(1)
-  {
-    for (int j = 0; j<180; j+=1)
-
-    {
-       for (int i = 0; i < 8; i++)
-        {
-          Servos[i].write(j);//Our Range is (60, 120) where 90 is full stop, 60 is full CW, and 120 is full CCW
-        }
-        Serial.println(j);
-        delay(100);
-    }   
-  }*/
-  RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_posotions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
+  RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_positions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
 
   for (int i = 0; i < RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT; i++)
   {
@@ -72,10 +54,6 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
       {
 		for (int i = 0; i < RC_SHIMBLEBOARD_SERVOINC_DATACOUNT; i++)
         {
-           int x[2];
-		
-		   x[0] = map(packet.data[0], -100, 100, 85, 95); // Continuous servo map
-		   x[1] = map(packet.data[1], -100, 100, 120, 180); // Rest state: 150
 		   
 		   Servos[i].write(servo_positions[i] + packet.data[i]);
         }
@@ -84,21 +62,38 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
 
       case RC_SHIMBLEBOARD_MAINGIMBALINC_DATAID: //Main Gimbal Increment
       {
-        for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
-        {
-           map(packet.data[i], -100, 100, 0, 180);
+        int new_pos[2];
 		   
-		   Servos[i].write(servo_positions[i] + packet.data[i]);
+		new_pos[1] = servo_positions[1] + packet.data[1];
+	    
+		// Check new values against servo range
+		if (new_pos[1] > 45) new_pos[1] = 45;
+		else if (new_pos[1] < 0) new_pos[1] = 0;
+		
+		for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
+        {  
+		   Servos[1].write(new_pos[1]);
         }
         break;
       }
 
       case RC_SHIMBLEBOARD_DRIVEGIMBALINC_DATAID: //Drive Gimbal Increment
       {
+	    int new_pos[2];
+		
+		new_pos[0] = servo_positions[2] + packet.data[0];
+		new_pos[1] = servo_positions[3] + packet.data[1];
+	    
+		// Check new values against servo range
+		//if (new_pos[0] > 180) new_pos[0] = 180;
+		//else if (new_pos[0] < 120) new_pos[0] = 120;
+		if (new_pos[1] > 45) new_pos[1] = 45;
+		else if (new_pos[1] < 0) new_pos[1] = 0;
+		
+		
         for (int i = 0; i < RC_SHIMBLEBOARD_DRIVEGIMBALINC_DATACOUNT; i++)
         {
-           map(packet.data[i], -100, 100, 0, 180);
-		   Servos[i].write(servo_positions[i] + packet.data[i]);
+		   Servos[i + 2].write(new_pos[i]);
         }
         break;
       }
@@ -115,37 +110,36 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
 
       case RC_SHIMBLEBOARD_MAINGIMBALABS_DATAID: //Main Gimbal Abolute
       {
-        int x[2];
+        int mapped_pos[2];
 		
-		x[0] = map(packet.data[0], -100, 100, 85, 94); // Continuous servo map
-		x[1] = map(packet.data[4], -100, 100, 120, 180); // Rest state: 150
+		mapped_pos[0] = map(packet.data[0], -100, 100, 85, 94); // Continuous servo map
+		mapped_pos[1] = map(packet.data[4], -100, 100, 120, 180); // Rest state: 150
 		
-		if (x[0] < 92 && x[0] > 87)
+		if (mapped_pos[0] < 92 && mapped_pos[0] > 87)
 		{
-			x[0] = 89;
+			mapped_pos[0] = 89;
 		}
 		
-		Servos[4].write(x[0]);
-		Servos[1].write(x[1]);
+		Servos[0].write(mapped_pos[0]);
+		Servos[1].write(mapped_pos[1]);
 		
 		for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALABS_DATACOUNT; i++)
         {  
-		//   Servos[i].write(x[i]);
+		//   Servos[i].write(mapped_pos[i]);
         }
         break;    
       }
 
       case RC_SHIMBLEBOARD_DRIVEGIMBALABS_DATAID: //Drive Gimbal Abolute
       {
-        int x[2];
+        int mapped_pos[2];
 		
-		x[0] = map(packet.data[0], -100, 100, 0, 40); // Continuous servo map
-		x[1] = map(packet.data[1], -100, 100, 120, 180); // Rest state: 150
+		//mapped_pos[0] = map(packet.data[0], -100, 100, 0, 40); // 
+		mapped_pos[1] = map(packet.data[1], -100, 100, 0, 45); // Rest state: 15
 		
 		for (int i = 0; i < RC_SHIMBLEBOARD_DRIVEGIMBALABS_DATACOUNT; i++)
         {
-           map(packet.data[i], -100, 100, 0, 180);
-		   Servos[i].write(x[i]);
+		   Servos[i + 2].write(mapped_pos[i]);
         }
         break;    
       }
