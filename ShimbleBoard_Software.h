@@ -21,7 +21,29 @@
 #define SERVO_7_CRTL_PIN   PK_4
 #define SERVO_8_CRTL_PIN   PG_1
     //Delays
-#define ROVECOMM_DELAY    5
+#define ROVECOMM_DELAY        5
+
+	//Misc Values
+#define IGNORE_THRESHOLD      5
+#define INC_VALUE             3
+
+#deine
+
+	//Servo Positions
+#define SERVO_1_REST         89
+#define SERVO_2_REST        150
+#define SERVO_3_REST        126
+#define SERVO_4_REST         90
+
+#define SERVO_1_MAX          92
+#define SERVO_2_MAX         180
+#define SERVO_3_MAX         162
+#define SERVO_4_MAX         180
+
+#define SERVO_1_MIN          85
+#define SERVO_2_MIN          64
+#define SERVO_3_MIN          90
+#define SERVO_4_MIN           0
 
 // Function Declarations ////////////////////////////////////////////////////////////////////////////////
 void shimbleSetup();
