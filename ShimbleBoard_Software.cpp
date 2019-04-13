@@ -70,20 +70,27 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
       case RC_SHIMBLEBOARD_MAINGIMBALINC_DATAID: //Main Gimbal Increment
       {
 		
-		if(packet.data[1] > IGNORE_THRESHOLD)
+		if(packet.data[1] < -IGNORE_THRESHOLD)
 		{
 			servo_positions[1] = servo_positions[1] + INC_VALUE;
 			if (servo_positions[1] >= SERVO_2_MAX) {servo_positions[1] = SERVO_2_MAX;}
 		}
 		
-		if(packet.data[1] < -IGNORE_THRESHOLD)
+		if(packet.data[1] > IGNORE_THRESHOLD)
 		{
 			servo_positions[1] = servo_positions[1] - INC_VALUE;
 		    if (servo_positions[1] <= SERVO_2_MIN) {servo_positions[1] = SERVO_2_MIN;}
 		}
 		
-		servo_positions[0] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
-		
+    if(packet.data[0] == 0)
+    {
+      servo_positions[0] = SERVO_1_REST;
+    }
+    else
+    {
+		  servo_positions[0] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
+		}
+
 		for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
         {  
 		   Servos[i].write(servo_positions[i]);
