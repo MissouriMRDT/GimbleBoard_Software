@@ -22,29 +22,39 @@
 #define SERVO_8_CRTL_PIN   PG_1
     //Delays
 #define ROVECOMM_DELAY     5
+#define STARTUP_DELAY	   600
 
 	//Misc Values
-#define IGNORE_THRESHOLD   50
+#define IGNORE_THRESHOLD1  50
+#define IGNORE_THRESHOLD2  10
 #define INC_VALUE          35
+#define STARTUP_INC 	   500
 
 	//Servo Positions
-#define SERVO_1_REST       1472 //1470 is boundary in which it stops drifting to right; 1476 is boundary in which it stops drifting left; 1473 is middle, no drifting
-#define SERVO_2_REST       1400 //Main cam pitch facing up. Can lower value to face further upwards.
-#define SERVO_3_REST       1830 //Drive cam pan facing forward.
-#define SERVO_4_REST       1500 //Drive cam pitch facing forward.
+		//Controlling FS5103R continuous servo
+#define SERVO_1_REST       1470 //1467 is boundary in which it stops drifting to right; 1472 is boundary in which it stops drifting left; 1473 is middle, no drifting
+#define SERVO_2_REST       1700 //Main cam pitch facing forward.
+#define SERVO_3_REST       1320 //Drive cam pan facing forward.
+#define SERVO_4_REST       1400 //Drive cam pitch facing forward.
 
 #define SERVO_1_MAX        1523 //Change value to change how fast the pan moves left and right. 
-#define SERVO_2_MAX        2000 //Main cam pitch facing down; Higher than 2000 faces camera directly into 3d print.
-#define SERVO_3_MAX        1400 //Drive cam pan max right; Lower than 1400 causes servo to jitter.
+#define SERVO_2_MAX        2250 //Main cam pitch facing down; Higher than 2000 faces camera directly into 3d print.
+#define SERVO_3_MAX        1280 //Drive cam pan max right; Lower than 1280 causes servo to jitter.
 #define SERVO_4_MAX        2200 //Drive cam pitch facing down; Higher than 2200 causes servo to jitter.
 
 #define SERVO_1_MIN        1423 //Change value to change how fast the pan moves left and right.
-#define SERVO_2_MIN        1000
-#define SERVO_3_MIN        2230 //Drive cam pan max left; Higher than 2230 causes servo to jitter.
+#define SERVO_2_MIN        700 //Main cam pitch facing up. Lower value to face further upwards.
+#define SERVO_3_MIN        2220 //Drive cam pan max left; Higher than 2220 causes servo to jitter.
 #define SERVO_4_MIN        750 //Drive cam pitch facing up; Lower than 750 causes servo to jitter.
+
+		//Controlling RGS-4C continuous servo. Started using once the only FS5103R we had broke.
+#define SERVORGS_1_REST	   1500
+#define SERVORGS_1_LEFT	   1580 //1580
+#define SERVORGS_1_RIGHT   1411 //1411
 
 // Function Declarations ////////////////////////////////////////////////////////////////////////////////
 void shimbleSetup();
 void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm);
+void startupRoutine();
 
 #endif

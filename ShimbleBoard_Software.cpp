@@ -2,6 +2,7 @@
     // Main .cpp File
 //
 // Created for 2019 Valkyrie by: Andrew Phillips, ajpnq2
+//                               Jacob Lipina, jrlwd5
 //
 // Libraries ///////////////////////////////////////////////////////////////////////////////////////////
 #include "ShimbleBoard_Software.h"
@@ -13,6 +14,8 @@ Servo Servos[8];
 //RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_positions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
 uint16_t servo_positions[8];
 uint32_t telemetry_time = 0;
+bool continuous_servo_detach = false;
+bool startup_routine = false;
 
 // Setup & Loop Funcitons //////////////////////////////////////////////////////////////////////////////
 
@@ -31,10 +34,10 @@ void shimbleSetup() //void setup
 
   Servos[0].writeMicroseconds(SERVO_1_REST);
   Servos[1].writeMicroseconds(SERVO_2_REST);
-  Servos[2].write(SERVO_3_REST);
-  Servos[3].write(SERVO_4_REST);
+  Servos[2].writeMicroseconds(SERVO_3_REST);
+  Servos[3].writeMicroseconds(SERVO_4_REST);
 
-  servo_positions[0] = SERVO_1_REST;
+  servo_positions[0] = SERVORGS_1_REST;
   servo_positions[1] = SERVO_2_REST;
   servo_positions[2] = SERVO_3_REST;
   servo_positions[3] = SERVO_4_REST;
@@ -44,18 +47,12 @@ void shimbleSetup() //void setup
 
 void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void loop
 { 
-
-  for (int i = 1; i < RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT; i++)
+  if(startup_routine == false)
   {
-    Servos[i].writeMicroseconds(servo_positions[i]);
-    //servo_positions[i] = map(Servos[i].read(), 0, 180, 1000, 2000);
+    startup_routine = true;
+    startupRoutine();
   }
-/*
-  Servos[0].writeMicroseconds(SERVO_1_REST);
-  Servos[1].writeMicroseconds(SERVO_2_REST);
-  Servos[2].write(SERVO_3_REST);
-  Servos[3].write(SERVO_4_REST);
-*/
+
   if(packet.data_id != 0)
   {
     switch (packet.data_id)
@@ -78,66 +75,116 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
       }
 
       case RC_SHIMBLEBOARD_MAINGIMBALINC_DATAID: //Main Gimbal Increment
-      {
-		
-		    if(packet.data[1] < -IGNORE_THRESHOLD)
-		    {
-		    	servo_positions[1] = servo_positions[1] + INC_VALUE;
-		    	if (servo_positions[1] >= SERVO_2_MAX) {servo_positions[1] = SERVO_2_MAX;}
-		    }
+      { //Using Tower Pro MG-995, 180 degree servo for cam tilt
+        //Using FS5103R continuous rotation servo for cam pan
+        //Using RGS-4C continous rotation servo as backup for cam pan
 		    
-		    if(packet.data[1] > IGNORE_THRESHOLD)
-		    {
-		    	servo_positions[1] = servo_positions[1] - INC_VALUE;
-		      if (servo_positions[1] <= SERVO_2_MIN) {servo_positions[1] = SERVO_2_MIN;}
-		    }
-		    
-        if(packet.data[0] == 0)
+        /*
+        //Servo 1 control for FS5103R continuos servo
+        if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
-          servo_positions[0] = SERVO_1_REST;
+          if(continuous_servo_detach == false)
+          {
+            Servos[0].detach();
+            Serial.println("Servo[0] Detatched");
+            continuous_servo_detach = true;
+          }
         }
+        if(packet.data[0] < -IGNORE_THRESHOLD2)
+        {
+          //RGS-4C continuous servo
+          servo_positions[0] = SERVORGS_1_LEFT;
+          Serial.println("Main Pan Left");
+        }
+        if(packet.data[0] > IGNORE_THRESHOLD2)
+        {
+          //RGS-4C continuous servo
+          servo_positions[0] = SERVORGS_1_RIGHT;
+          Serial.println("Main Pan Right");
+        } 
         else
         {
-		      servo_positions[0] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
-		    }
+          if(continuous_servo_detach == true)
+          {
+            continuous_servo_detach = false;
+            Servos[0].attach(SERVO_1_CRTL_PIN);
+          }
+          //servo_positions[0] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
+        }
+        */
+
+        //Servo 1 control for RGS-4C continuos servo
+        if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
+        {
+          servo_positions[0] = SERVORGS_1_REST;
+          Serial.println("Main Pan Resting...");
+        }
+        if(packet.data[0] < -IGNORE_THRESHOLD2)
+        {
+          servo_positions[0] = SERVORGS_1_LEFT;
+          Serial.println("Main Pan Left");
+        }
+        if(packet.data[0] > IGNORE_THRESHOLD2)
+        {
+          servo_positions[0] = SERVORGS_1_RIGHT;
+          Serial.println("Main Pan Right");
+        }
+
+        //Servo 2 control
+        if(packet.data[1] < -IGNORE_THRESHOLD1)
+        {
+          servo_positions[1] = servo_positions[1] + INC_VALUE;
+          Serial.println("Main Tilt Down");
+          if (servo_positions[1] >= SERVO_2_MAX) {servo_positions[1] = SERVO_2_MAX;} //Don't write value to servo higher than its max
+        }
+        
+        if(packet.data[1] > IGNORE_THRESHOLD1)
+        {
+          servo_positions[1] = servo_positions[1] - INC_VALUE;
+          Serial.println("Main Tilt Up");
+          if (servo_positions[1] <= SERVO_2_MIN) {servo_positions[1] = SERVO_2_MIN;} //Don't write value to servo higher than its min
+        }
     
+        //Write new positions to servos
 		    for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
         {  
 		      Servos[i].writeMicroseconds(servo_positions[i]);
-        }
-		
+        }		
         break;
       }
 
       case RC_SHIMBLEBOARD_DRIVEGIMBALINC_DATAID: //Drive Gimbal Increment
       {
-	      if(packet.data[0] > IGNORE_THRESHOLD)
+        //Servo 3 control
+	      if(packet.data[0] > IGNORE_THRESHOLD1)
 		    {
 		    	servo_positions[2] = servo_positions[2] - INC_VALUE;
-		      if (servo_positions[2] <= SERVO_3_MAX) servo_positions[2] = SERVO_3_MAX;
+		      if (servo_positions[2] <= SERVO_3_MAX) servo_positions[2] = SERVO_3_MAX; //Don't write value to servo higher than its max
 		    }
     
-		    if(packet.data[0] < -IGNORE_THRESHOLD)
+		    if(packet.data[0] < -IGNORE_THRESHOLD1)
 		    {
 		    	servo_positions[2] = servo_positions[2] + INC_VALUE;
-		    	if (servo_positions[2] >= SERVO_3_MIN) servo_positions[2] = SERVO_3_MIN;
+		    	if (servo_positions[2] >= SERVO_3_MIN) servo_positions[2] = SERVO_3_MIN; //Don't write value to servo higher than its min
 		    }
 		    
-		    if(packet.data[1] > IGNORE_THRESHOLD)
+        //Servo 4 control
+		    if(packet.data[1] < -IGNORE_THRESHOLD1)
 		    {
 		    	servo_positions[3] = servo_positions[3] - INC_VALUE;
-		    	if (servo_positions[3] <= SERVO_4_MIN) servo_positions[3] = SERVO_4_MIN;
+		    	if (servo_positions[3] <= SERVO_4_MIN) servo_positions[3] = SERVO_4_MIN; //Don't write value to servo higher than its min
 		    }
 		    
-		    if(packet.data[1] < -IGNORE_THRESHOLD)
+		    if(packet.data[1] > IGNORE_THRESHOLD1)
 		    {
 		    	servo_positions[3] = servo_positions[3] + INC_VALUE;
-		    	if (servo_positions[3] >= SERVO_4_MAX) servo_positions[3] = SERVO_4_MAX;
+		    	if (servo_positions[3] >= SERVO_4_MAX) servo_positions[3] = SERVO_4_MAX; //Don't write value to servo higher than its max
 		    }
-		    	
+		    
+        //Write new positions to servos
 		    for (int i = 0; i < RC_SHIMBLEBOARD_DRIVEGIMBALINC_DATACOUNT; i++)
         {  
-		      Servos[i + 2].write(servo_positions[i + 2]);
+		      Servos[i + 2].writeMicroseconds(servo_positions[i + 2]);
         }
         break;
       }
@@ -210,4 +257,35 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
     RoveComm->write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
     delay(ROVECOMM_DELAY);
   }
+}
+
+void startupRoutine() // Servo Startup Routine; Performed to verify hardware functionality before Rovecomm control
+{
+  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
+  //delay(500);
+  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
+  //delay(500);
+  //Servos[0].writeMicroseconds(SERVORGS_1_RIGHT);
+  //delay(1000);
+  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
+  //delay(1000);
+  Servos[0].writeMicroseconds(SERVORGS_1_REST);
+  delay(STARTUP_DELAY);
+  //Servos[1].writeMicroseconds(SERVO_2_REST - 500);
+  delay(STARTUP_DELAY);
+  Servos[1].writeMicroseconds(SERVO_2_REST + 500);
+  delay(STARTUP_DELAY);
+  Servos[1].writeMicroseconds(SERVO_2_REST);
+  delay(STARTUP_DELAY);
+  //Servos[2].writeMicroseconds(SERVO_3_MAX;
+  //delay(100);
+  Servos[2].writeMicroseconds(SERVO_3_REST + 500);
+  delay(STARTUP_DELAY);
+  Servos[2].writeMicroseconds(SERVO_3_REST);
+  delay(STARTUP_DELAY);
+  Servos[3].writeMicroseconds(SERVO_4_REST + 500);
+  delay(STARTUP_DELAY);
+  //Servos[3].writeMicroseconds(SERVO_4_REST - 500);
+  //delay(STARTUP_DELAY);
+  Servos[3].writeMicroseconds(SERVO_4_REST);
 }
