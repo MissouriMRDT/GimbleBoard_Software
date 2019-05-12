@@ -37,7 +37,7 @@ void shimbleSetup() //void setup
   Servos[2].writeMicroseconds(SERVO_3_REST);
   Servos[3].writeMicroseconds(SERVO_4_REST);
 
-  servo_positions[0] = SERVORGS_1_REST;
+  servo_positions[0] = SERVO_1_REST;
   servo_positions[1] = SERVO_2_REST;
   servo_positions[2] = SERVO_3_REST;
   servo_positions[3] = SERVO_4_REST;
@@ -53,8 +53,20 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
     startupRoutine();
   }
 
+    Serial.println(packet.data_id);
+    Serial.println(packet.data[0]);
+    Serial.println(packet.data[1]);
+    Serial.println(packet.data[2]);
+    Serial.println(packet.data[3]);
+    Serial.println(packet.data[4]);
+    Serial.println(packet.data[5]);
+    Serial.println(packet.data[6]);
+    Serial.println(packet.data[7]);
+
   if(packet.data_id != 0)
   {
+    
+
     switch (packet.data_id)
     {
       case RC_SHIMBLEBOARD_SERVOINC_DATAID: //Servo Increment
@@ -79,7 +91,7 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
         //Using FS5103R continuous rotation servo for cam pan
         //Using RGS-4C continous rotation servo as backup for cam pan
 		    
-        /*
+        
         //Servo 1 control for FS5103R continuos servo
         if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
@@ -111,9 +123,9 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
           }
           //servo_positions[0] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
         }
-        */
+        
 
-        //Servo 1 control for RGS-4C continuos servo
+        /* //Servo 1 control for RGS-4C continuos servo
         if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
           servo_positions[0] = SERVORGS_1_REST;
@@ -143,7 +155,7 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
           servo_positions[1] = servo_positions[1] - INC_VALUE;
           Serial.println("Main Tilt Up");
           if (servo_positions[1] <= SERVO_2_MIN) {servo_positions[1] = SERVO_2_MIN;} //Don't write value to servo higher than its min
-        }
+        }*/
     
         //Write new positions to servos
 		    for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
@@ -261,31 +273,21 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
 
 void startupRoutine() // Servo Startup Routine; Performed to verify hardware functionality before Rovecomm control
 {
-  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
+  //Servos[0].writeMicroseconds(SERVO_1_LEFT);
   //delay(500);
-  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
+  //Servos[0].writeMicroseconds(SERVO_1_RIGHT);
   //delay(500);
-  //Servos[0].writeMicroseconds(SERVORGS_1_RIGHT);
-  //delay(1000);
-  //Servos[0].writeMicroseconds(SERVORGS_1_LEFT);
-  //delay(1000);
-  Servos[0].writeMicroseconds(SERVORGS_1_REST);
-  delay(STARTUP_DELAY);
-  //Servos[1].writeMicroseconds(SERVO_2_REST - 500);
-  delay(STARTUP_DELAY);
+  //Servos[0].writeMicroseconds(SERVO_1_REST);
+  //delay(STARTUP_DELAY);
   Servos[1].writeMicroseconds(SERVO_2_REST + 500);
   delay(STARTUP_DELAY);
   Servos[1].writeMicroseconds(SERVO_2_REST);
   delay(STARTUP_DELAY);
-  //Servos[2].writeMicroseconds(SERVO_3_MAX;
-  //delay(100);
   Servos[2].writeMicroseconds(SERVO_3_REST + 500);
   delay(STARTUP_DELAY);
   Servos[2].writeMicroseconds(SERVO_3_REST);
   delay(STARTUP_DELAY);
   Servos[3].writeMicroseconds(SERVO_4_REST + 500);
   delay(STARTUP_DELAY);
-  //Servos[3].writeMicroseconds(SERVO_4_REST - 500);
-  //delay(STARTUP_DELAY);
   Servos[3].writeMicroseconds(SERVO_4_REST);
 }
