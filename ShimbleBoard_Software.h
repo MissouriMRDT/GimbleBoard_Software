@@ -53,8 +53,6 @@
 #define SERVORGS_1_RIGHT   1411 //1411
 
 // Function Declarations ////////////////////////////////////////////////////////////////////////////////
-void shimbleSetup();
-void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm);
 void startupRoutine();
 
 #endif
