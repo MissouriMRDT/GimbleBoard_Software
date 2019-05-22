@@ -23,7 +23,7 @@ bool startup_routine = false;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   delay(10);
   RoveComm.begin(RC_SHIMBLEBOARD_FOURTHOCTET);
@@ -63,16 +63,7 @@ void loop()
     startupRoutine();
   }
 
-    Serial.println(packet.data_id);
-    Serial.println(packet.data[0]);
-    Serial.println(packet.data[1]);
-    Serial.println(packet.data[2]);
-    Serial.println(packet.data[3]);
-    Serial.println(packet.data[4]);
-    Serial.println(packet.data[5]);
-    Serial.println(packet.data[6]);
-    Serial.println(packet.data[7]);
-
+  //Serial.println(".");
   if(packet.data_id != 0)
   {
     switch (packet.data_id)
@@ -98,8 +89,10 @@ void loop()
       { //Using Tower Pro MG-995, 180 degree servo for cam tilt
         //Using FS5103R continuous rotation servo for cam pan
         //Using RGS-4C continous rotation servo as backup for cam pan
-		    
-        
+
+        Serial.println("Main");
+        Serial.println(packet.data[0]);
+        Serial.println(packet.data[1]);
         //Servo 1 control for FS5103R continuos servo
         if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
@@ -154,12 +147,15 @@ void loop()
 		    /*for (int i = 0; i < RC_SHIMBLEBOARD_MAINGIMBALINC_DATACOUNT; i++)
         {  
 		      Servos[i].writeMicroseconds(servo_positions[i]);
-        }		
-        break;*/
+        }		*/
+        break;
       }
 
       case RC_SHIMBLEBOARD_DRIVEGIMBALINC_DATAID: //Drive Gimbal Increment
       {
+        Serial.println("Drive");
+        Serial.println(packet.data[0]);
+        Serial.println(packet.data[1]);
         //Servo 3 control
 	      if(packet.data[0] > IGNORE_THRESHOLD1)
 		    {
@@ -285,4 +281,3 @@ void startupRoutine() // Servo Startup Routine; Performed to verify hardware fun
   Servos[3].writeMicroseconds(SERVO_4_REST);
   Serial.println("Startup Routine Complete");
 }
-
