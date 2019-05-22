@@ -9,6 +9,8 @@
 #include "RoveComm.h"
 #include <Energia.h>
 
+RoveCommEthernetUdp RoveComm;
+
 // Variable Declarations ///////////////////////////////////////////////////////////////////////////////
 Servo Servos[8];
 //RC_SHIMBLEBOARD_SERVOPOS_DATATYPE servo_positions[RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT];
@@ -19,10 +21,13 @@ bool startup_routine = false;
 
 // Setup & Loop Funcitons //////////////////////////////////////////////////////////////////////////////
 
-void shimbleSetup() //void setup
+void setup()
 {
   Serial.begin(9600);
 
+  delay(10);
+  RoveComm.begin(RC_SHIMBLEBOARD_FOURTHOCTET);
+  delay(10);
   Servos[0].attach(SERVO_1_CRTL_PIN);
   Servos[1].attach(SERVO_2_CRTL_PIN);
   Servos[2].attach(SERVO_3_CRTL_PIN);
@@ -45,8 +50,11 @@ void shimbleSetup() //void setup
   Serial.println("Shimble Setup Complete.");
 }
 
-void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void loop
+void loop()
 { 
+  rovecomm_packet packet;
+  packet = RoveComm.read();
+  
   if(startup_routine == false)
   {
     startup_routine = true;
@@ -266,7 +274,7 @@ void shimbleLoop(rovecomm_packet packet, RoveCommEthernetUdp * RoveComm) //void 
   if (millis() - telemetry_time >= 1000) // If it's been more than 1 second since telemetry was sent,
   {                                      // send telemetry and update telemetry_time
     telemetry_time = millis();
-    RoveComm->write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
+    RoveComm.write(RC_SHIMBLEBOARD_SERVOPOS_DATAID, RC_SHIMBLEBOARD_SERVOPOS_DATACOUNT, servo_positions);
     delay(ROVECOMM_DELAY);
   }
 }
