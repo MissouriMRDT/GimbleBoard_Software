@@ -32,17 +32,17 @@
 
 	//Servo Positions
 		//Controlling FS5103R continuous servo
-#define SERVO_1_REST       1470 //1467 is boundary in which it stops drifting to right; 1472 is boundary in which it stops drifting left; 1473 is middle, no drifting
+#define SERVO_1_REST       1500 //1500 is actual center since the potentiometer was glued in place
 #define SERVO_2_REST       1400 //Main cam pitch facing forward.
 #define SERVO_3_REST       1320 //Drive cam pan facing forward.
 #define SERVO_4_REST       1400 //Drive cam pitch facing forward.
 
-#define SERVO_1_MAX        1523 //Change value to change how fast the pan moves left and right. 
+#define SERVO_1_MAX        1560 //Change value to change how fast the pan moves left and right. 
 #define SERVO_2_MAX        2250 //Main cam pitch facing down; Higher than 2000 faces camera directly into 3d print.
 #define SERVO_3_MAX        1280 //Drive cam pan max right; Lower than 1280 causes servo to jitter.
 #define SERVO_4_MAX        2200 //Drive cam pitch facing down; Higher than 2200 causes servo to jitter.
 
-#define SERVO_1_MIN        1423 //Change value to change how fast the pan moves left and right.
+#define SERVO_1_MIN        1440 //Change value to change how fast the pan moves left and right.
 #define SERVO_2_MIN        100 //Main cam pitch facing up. Lower value to face further upwards.
 #define SERVO_3_MIN        2220 //Drive cam pan max left; Higher than 2220 causes servo to jitter.
 #define SERVO_4_MIN        750 //Drive cam pitch facing up; Lower than 750 causes servo to jitter.
