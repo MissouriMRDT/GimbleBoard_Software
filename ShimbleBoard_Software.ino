@@ -37,14 +37,14 @@ void setup()
   Servos[6].attach(SERVO_7_CRTL_PIN);
   Servos[7].attach(SERVO_8_CRTL_PIN);
 
-  Servos[0].writeMicroseconds(SERVO_1_REST);
-  //Servos[0].writeMicroseconds(SERVORGS_1_REST);
+  //Servos[0].writeMicroseconds(SERVO_1_REST);
+  Servos[0].writeMicroseconds(SERVORGS_1_REST);
   Servos[1].writeMicroseconds(SERVO_2_REST);
   Servos[2].writeMicroseconds(SERVO_3_REST);
   Servos[3].writeMicroseconds(SERVO_4_REST);
 
-  servo_positions[0] = SERVO_1_REST;
-  //servo_positions[0] = SERVORGS_1_REST;
+  //servo_positions[0] = SERVO_1_REST;
+  servo_positions[0] = SERVORGS_1_REST;
   servo_positions[1] = SERVO_2_REST;
   servo_positions[2] = SERVO_3_REST;
   servo_positions[3] = SERVO_4_REST;
@@ -93,6 +93,7 @@ void loop()
         Serial.println("Main");
         Serial.println(packet.data[0]);
         Serial.println(packet.data[1]);
+        /*
         //Servo 1 control for FS5103R continuos servo
         if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
@@ -107,24 +108,24 @@ void loop()
         {
           servo_positions[4] = map(packet.data[0], -100, 100, SERVO_1_MAX, SERVO_1_MIN); // Continuous servo map
           Serial.println("Main Pan Right");
-        }        
+        } */       
 
-        /* //Servo 1 control for RGS-4C continuos servo
+        //Servo 1 control for RGS-4C continuos servo
         if((packet.data[0] > -IGNORE_THRESHOLD2) && (packet.data[0] < IGNORE_THRESHOLD2))
         {
-          servo_positions[0] = SERVORGS_1_REST;
+          servo_positions[4] = SERVORGS_1_REST;
           Serial.println("Main Pan Resting...");
         }
         if(packet.data[0] < -IGNORE_THRESHOLD2)
         {
-          servo_positions[0] = SERVORGS_1_LEFT;
+          servo_positions[4] = SERVORGS_1_LEFT;
           Serial.println("Main Pan Left");
         }
         if(packet.data[0] > IGNORE_THRESHOLD2)
         {
-          servo_positions[0] = SERVORGS_1_RIGHT;
+          servo_positions[4] = SERVORGS_1_RIGHT;
           Serial.println("Main Pan Right");
-        }*/
+        }
 
         //Servo 2 control
         if(packet.data[1] < -IGNORE_THRESHOLD1)
@@ -262,11 +263,19 @@ void loop()
 
 void startupRoutine() // Servo Startup Routine; Performed to verify hardware functionality before Rovecomm control
 {
+  /*
   Servos[4].writeMicroseconds(SERVO_1_MAX);
   delay(500);
   Servos[4].writeMicroseconds(SERVO_1_MIN);
   delay(640);
   Servos[4].writeMicroseconds(SERVO_1_REST);
+  delay(STARTUP_DELAY);
+  */
+  Servos[4].writeMicroseconds(SERVORGS_1_LEFT);
+  delay(500);
+  Servos[4].writeMicroseconds(SERVORGS_1_RIGHT);
+  delay(600);
+  Servos[4].writeMicroseconds(SERVORGS_1_REST);
   delay(STARTUP_DELAY);
   Servos[1].writeMicroseconds(SERVO_2_REST + 500);
   delay(STARTUP_DELAY);
