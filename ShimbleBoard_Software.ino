@@ -37,14 +37,14 @@ void setup()
   Servos[6].attach(SERVO_7_CRTL_PIN);
   Servos[7].attach(SERVO_8_CRTL_PIN);
 
-  //Servos[0].writeMicroseconds(SERVO_1_REST);
-  Servos[0].writeMicroseconds(SERVORGS_1_REST);
+  //Servos[4].writeMicroseconds(SERVO_1_REST);
+  Servos[4].writeMicroseconds(SERVORGS_1_REST);
   Servos[1].writeMicroseconds(SERVO_2_REST);
   Servos[2].writeMicroseconds(SERVO_3_REST);
   Servos[3].writeMicroseconds(SERVO_4_REST);
 
-  //servo_positions[0] = SERVO_1_REST;
-  servo_positions[0] = SERVORGS_1_REST;
+  //servo_positions[4] = SERVO_1_REST;
+  servo_positions[4] = SERVORGS_1_REST;
   servo_positions[1] = SERVO_2_REST;
   servo_positions[2] = SERVO_3_REST;
   servo_positions[3] = SERVO_4_REST;
@@ -271,6 +271,7 @@ void startupRoutine() // Servo Startup Routine; Performed to verify hardware fun
   Servos[4].writeMicroseconds(SERVO_1_REST);
   delay(STARTUP_DELAY);
   */
+  delay(500);
   Servos[4].writeMicroseconds(SERVORGS_1_LEFT);
   delay(500);
   Servos[4].writeMicroseconds(SERVORGS_1_RIGHT);
