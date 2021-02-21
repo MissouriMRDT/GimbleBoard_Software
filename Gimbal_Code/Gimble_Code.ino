@@ -75,7 +75,7 @@ void loop()
   {
     switch(packet.data_id)
     {
-      case RC_SHIMBLEBOARD_LEFT_DRIVE_SERVOINC_DATAID:
+      case RC_GIMBALBOARD_LEFTDRIVEGIMBALINCREMENT_DATA_ID:
       {
         Serial.println("Left Drive:");
         dataOutput();
@@ -83,7 +83,7 @@ void loop()
         break;
       }
       
-      case RC_SHIMBLEBOARD_RIGHT_DRIVE_SERVOINC_DATAID:
+      case RC_GIMBALBOARD_RIGHTDRIVEGIMBALINCREMENT_DATA_ID:
       {
         Serial.println("Right Drive:");
         dataOutput();
@@ -91,7 +91,7 @@ void loop()
         break;
       }
       
-      case RC_SHIMBLEBOARD_LEFT_MAIN_SERVOINC_DATAID:
+      case RC_GIMBALBOARD_LEFTMAINGIMBALINCREMENT_DATA_ID:
       {
         Serial.println("Left Main:");
         dataOutput();
@@ -99,7 +99,7 @@ void loop()
         break;
       }
       
-      case RC_SHIMBLEBOARD_RIGHT_MAIN_SERVOINC_DATAID:
+      case RC_GIMBALBOARD_RIGHTMAINGIMBALINCREMENT_DATA_ID:
       {
         Serial.println("Right Main:");
         dataOutput();
