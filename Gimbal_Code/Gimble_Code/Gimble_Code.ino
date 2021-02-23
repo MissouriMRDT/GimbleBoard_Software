@@ -9,6 +9,7 @@ int16_t servoPosition[8];
 //uint16_t servoOrigin[8];
 uint16_t servoMax[8];
 uint16_t servoMin[8];
+EthernetServer TCPServer(RC_ROVECOMM_GIMBALBOARD_PORT);
 
 RoveCommEthernet  RoveComm;
 rovecomm_packet packet;
@@ -18,7 +19,7 @@ void setup()
   Serial.begin(115200);
   
   delay(ROVECOMM_DELAY);
-  RoveComm.begin(135, 11006);
+  RoveComm.begin(RC_GIMBALBOARD_FOURTHOCTET, &TCPServer);
   delay(ROVECOMM_DELAY);
 
   // attaches the servo array to the respective pins (1-8 servos are 0-7)
