@@ -17,6 +17,16 @@
 #define SERVO7 PK_5
 #define SERVO8 PM_0
 
+// Switches
+#define SERVO1_SW PE_0
+#define SERVO2_SW PE_1
+#define SERVO3_SW PE_2
+#define SERVO4_SW PE_3
+#define SERVO5_SW PD_7
+#define SERVO6_SW PA_6
+#define SERVO7_SW PM_4
+#define SERVO8_SW PM_5
+
   //Starting
 #define SERVO1_START 135
 #define SERVO2_START 135
@@ -58,5 +68,8 @@
 void startupRoutine();
 void dataOutput();
 void gimbalIncrement(const int & servoNum1, const int & servoNum2);
+
+RoveCommEthernet  RoveComm;
+rovecomm_packet packet;
 
 #endif
