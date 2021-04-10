@@ -78,7 +78,7 @@ void loop()
     {
       case RC_GIMBALBOARD_LEFTDRIVEGIMBALINCREMENT_DATA_ID:
       {
-        Serial.println("Left Drive:");
+        Serial.println("Left Drive Incremental:");
         dataOutput();
         gimbalIncrement(0, 2);
         break;
@@ -86,7 +86,7 @@ void loop()
       
       case RC_GIMBALBOARD_RIGHTDRIVEGIMBALINCREMENT_DATA_ID:
       {
-        Serial.println("Right Drive:");
+        Serial.println("Right Drive Incremental:");
         dataOutput();
         gimbalIncrement(2, 4);
         break;
@@ -94,7 +94,7 @@ void loop()
       
       case RC_GIMBALBOARD_LEFTMAINGIMBALINCREMENT_DATA_ID:
       {
-        Serial.println("Left Main:");
+        Serial.println("Left Main Incremental:");
         dataOutput();
         gimbalIncrement(4, 6);
         break;
@@ -102,9 +102,41 @@ void loop()
       
       case RC_GIMBALBOARD_RIGHTMAINGIMBALINCREMENT_DATA_ID:
       {
-        Serial.println("Right Main:");
+        Serial.println("Right Main Incremental:");
         dataOutput();
         gimbalIncrement(6, 8);
+        break;
+      }
+
+      case RC_GIMBALBOARD_LEFTDRIVEGIMBALABSOLUTE_DATA_ID:
+      {
+        Serial.println("Left Drive Incremental:");
+        dataOutput();
+        gimbalAbsolute(0, 2);
+        break;
+      }
+      
+      case RC_GIMBALBOARD_RIGHTDRIVEGIMBALABSOLUTE_DATA_ID:
+      {
+        Serial.println("Right Drive Absolute:");
+        dataOutput();
+        gimbalAbsolute(2, 4);
+        break;
+      }
+      
+      case RC_GIMBALBOARD_LEFTMAINGIMBALABSOLUTE_DATA_ID:
+      {
+        Serial.println("Left Main Absolute:");
+        dataOutput();
+        gimbalAbsolute(4, 6);
+        break;
+      }
+      
+      case RC_GIMBALBOARD_RIGHTMAINGIMBALABSOLUTE_DATA_ID:
+      {
+        Serial.println("Right Main Absolute:");
+        dataOutput();
+        gimbalAbsolute(6, 8);
         break;
       }
 
@@ -188,14 +220,28 @@ void gimbalIncrement(const int & servoNum1, const int & servoNum2)
 
 void gimbalAbsolute(const int & servoNum1, const int & servoNum2)
 {
-  int16_t *abosluteValues = (int16_t*)packet.data;
+  int16_t *absoluteValues = (int16_t*)packet.data;
 
   Serial.println("Absolute Values");
-  Serial.println(AbsoluteValues[0]);
-  Serial.println(AbsoluteValues[1]);
+  Serial.println(absoluteValues[0]);
+  Serial.println(absoluteValues[1]);
 
   for(int i = servoNum1; i < servoNum2; i++)
   {
-    if(absoluteValues[i-servoNum1] <= servoMax[])
+    if(servoMin[i] <= absoluteValues[i - servoNum1] <= servoMax[i])
+    {
+      servoPosition[i] = absoluteValues[i - servoNum1];
+    }
+    if(servoMin[i] > absoluteValues[i - servoNum1])
+    {
+      servoPosition[i] = servoMin[i];
+    }
+    if(servoMax[i] < absoluteValues[i - servoNum1])
+    {
+      servoPosition[i] = servoMax[i];
+    }
+    Serial.println(servoPosition[i]);
+    servos[i].write((int)servoPosition[i]);
+    Serial.println(servos[i].read());
   }
 }
