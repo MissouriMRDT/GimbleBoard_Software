@@ -107,6 +107,14 @@ void loop()
         gimbalIncrement(6, 8);
         break;
       }
+
+      case RC_GIMBALBOARD_INITIATETESTROUTINE_DATA_ID:
+      {
+        Serial.println("Startup Routine");
+        dataOutput();
+        startupRoutine();
+        break;
+      }
     }
   }
 }
@@ -175,5 +183,19 @@ void gimbalIncrement(const int & servoNum1, const int & servoNum2)
     Serial.println(servoPosition[i]);
     servos[i].write((int)servoPosition[i]);
     Serial.println(servos[i].read());
+  }
+}
+
+void gimbalAbsolute(const int & servoNum1, const int & servoNum2)
+{
+  int16_t *abosluteValues = (int16_t*)packet.data;
+
+  Serial.println("Absolute Values");
+  Serial.println(AbsoluteValues[0]);
+  Serial.println(AbsoluteValues[1]);
+
+  for(int i = servoNum1; i < servoNum2; i++)
+  {
+    if(absoluteValues[i-servoNum1] <= servoMax[])
   }
 }

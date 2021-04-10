@@ -58,5 +58,6 @@
 void startupRoutine();
 void dataOutput();
 void gimbalIncrement(const int & servoNum1, const int & servoNum2);
+void gimbalAbsolute(const int & servoNum1, const int & servoNum2);
 
 #endif
